@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Customer Satisfaction Prediction</title>
+    <link rel="stylesheet" href="/static/csp_style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<div class="loader" id="loader">
+    <div class="loader-inner">
+        <div class="loader-line"></div>
+        <span>CSP</span>
+    </div>
+</div>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-follower" id="cursor-follower"></div>
+
+<header>
+    <div class="header-bg"></div>
+    <div class="header-content">
+        <div class="header-badge">Machine Learning · Data Science · Python</div>
+        <h1>Customer Satisfaction<br/><em>Prediction</em></h1>
+        <p class="header-sub">Predicting customer satisfaction using advanced ML algorithms on support ticket data</p>
+        <div class="header-stats">
+            <div class="hs"><span>8,469</span><small>Records</small></div>
+            <div class="hs-div"></div>
+            <div class="hs"><span>6</span><small>ML Models</small></div>
+            <div class="hs-div"></div>
+            <div class="hs"><span>17</span><small>Features</small></div>
+            <div class="hs-div"></div>
+            <div class="hs"><span>Advanced</span><small>Difficulty</small></div>
+        </div>
+        <a href="#predict" class="hero-btn">Try Prediction</a>
+    </div>
+    <div class="scroll-hint">
+        <div class="scroll-line"></div>
+        <span>Scroll</span>
+    </div>
+</header>
+
+<nav id="nav">
+    <div class="nav-inner">
+        <div class="nav-logo">CSP</div>
+        <div class="nav-links">
+            <a href="#overview">Overview</a>
+            <a href="#dataset">Dataset</a>
+            <a href="#eda">EDA</a>
+            <a href="#features">Features</a>
+            <a href="#models">Models</a>
+            <a href="#evaluation">Evaluation</a>
+            <a href="#predict">Predict</a>
+            <a href="#conclusion">Conclusion</a>
+        </div>
+    </div>
+</nav>
+
+<main>
+
+<section id="overview">
+    <div class="section-label">01 — Overview</div>
+    <h2>Project <em>Overview</em></h2>
+    <p>A multiclass classification problem aimed at predicting customer satisfaction ratings using historical support ticket data, feature engineering, and ensemble machine learning models.</p>
+    <div class="card-row">
+        <div class="card">
+            <div class="card-icon">◎</div>
+            <h3>Goal</h3>
+            <p>Predict customer satisfaction rating on a scale of 1 to 5 based on support ticket attributes and customer demographics.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">◈</div>
+            <h3>Domain</h3>
+            <p>Customer Support Analytics · Data Science · Natural Language Processing</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">◇</div>
+            <h3>Tools</h3>
+            <p>Python · Scikit-learn · Pandas · Matplotlib · Seaborn · VS Code · SQL</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">◉</div>
+            <h3>Pipeline</h3>
+            <p>Preprocessing → EDA → Feature Engineering → Model Building → Evaluation → Report</p>
+        </div>
+    </div>
+    <div class="process-flow">
+        <div class="pf-step"><div class="pf-num">01</div><div class="pf-label">Data Preprocessing</div></div>
+        <div class="pf-arrow">→</div>
+        <div class="pf-step"><div class="pf-num">02</div><div class="pf-label">EDA</div></div>
+        <div class="pf-arrow">→</div>
+        <div class="pf-step"><div class="pf-num">03</div><div class="pf-label">Feature Engineering</div></div>
+        <div class="pf-arrow">→</div>
+        <div class="pf-step"><div class="pf-num">04</div><div class="pf-label">Model Building</div></div>
+        <div class="pf-arrow">→</div>
+        <div class="pf-step"><div class="pf-num">05</div><div class="pf-label">Evaluation</div></div>
+    </div>
+</section>
+
+<section id="dataset">
+    <div class="section-label">02 — Dataset</div>
+    <h2>Dataset <em>Summary</em></h2>
+    <p>Customer Support Ticket Dataset containing tech product support inquiries with rich metadata including ticket type, priority, channel, and satisfaction ratings.</p>
+    <div class="stat-row">
+        <div class="stat-card"><div class="stat-ring"></div><h3>8,469</h3><p>Total Records</p></div>
+        <div class="stat-card"><div class="stat-ring"></div><h3>17</h3><p>Raw Features</p></div>
+        <div class="stat-card"><div class="stat-ring"></div><h3>2,769</h3><p>Rated Tickets</p></div>
+        <div class="stat-card"><div class="stat-ring"></div><h3>1 — 5</h3><p>Rating Scale</p></div>
+        <div class="stat-card"><div class="stat-ring"></div><h3>0</h3><p>Duplicate Rows</p></div>
+    </div>
+    <h3 class="table-title">Feature Description</h3>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>#</th><th>Feature</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td>01</td><td>Customer Age</td><td><span class="badge numeric">Numeric</span></td><td>Age of the customer (18–70)</td></tr>
+                <tr><td>02</td><td>Customer Gender</td><td><span class="badge cat">Categorical</span></td><td>Male / Female / Other</td></tr>
+                <tr><td>03</td><td>Product Purchased</td><td><span class="badge cat">Categorical</span></td><td>Tech product purchased by customer</td></tr>
+                <tr><td>04</td><td>Ticket Type</td><td><span class="badge cat">Categorical</span></td><td>Billing / Technical / Refund etc.</td></tr>
+                <tr><td>05</td><td>Ticket Subject</td><td><span class="badge cat">Categorical</span></td><td>Subject topic of the ticket</td></tr>
+                <tr><td>06</td><td>Ticket Status</td><td><span class="badge cat">Categorical</span></td><td>Open / Closed / Pending</td></tr>
+                <tr><td>07</td><td>Ticket Priority</td><td><span class="badge cat">Categorical</span></td><td>Low / Medium / High / Critical</td></tr>
+                <tr><td>08</td><td>Ticket Channel</td><td><span class="badge cat">Categorical</span></td><td>Email / Phone / Chat / Social Media</td></tr>
+                <tr><td>09</td><td>Response Duration</td><td><span class="badge numeric">Numeric</span></td><td>Time taken to resolve ticket (hrs)</td></tr>
+                <tr><td>10</td><td>Satisfaction Rating</td><td><span class="badge target">Target</span></td><td>Customer rating from 1 (low) to 5 (high)</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section id="eda">
+    <div class="section-label">03 — Exploratory Data Analysis</div>
+    <h2>Visual <em>Insights</em></h2>
+    <p>Deep dive into data distributions, correlations, and patterns across customer demographics, ticket attributes, and satisfaction levels.</p>
+    <div class="chart-grid">
+        <div class="chart-box large"><div class="chart-label">Satisfaction Distribution</div><img src="/static/csp_eda_charts/01_satisfaction_distribution.png" alt="Satisfaction"/></div>
+        <div class="chart-box large"><div class="chart-label">Customer Age Distribution</div><img src="/static/csp_eda_charts/02_age_distribution.png" alt="Age"/></div>
+        <div class="chart-box"><div class="chart-label">Ticket Priority</div><img src="/static/csp_eda_charts/03_ticket_priority.png" alt="Priority"/></div>
+        <div class="chart-box"><div class="chart-label">Ticket Type</div><img src="/static/csp_eda_charts/04_ticket_type.png" alt="Type"/></div>
+        <div class="chart-box"><div class="chart-label">Ticket Channel</div><img src="/static/csp_eda_charts/05_ticket_channel.png" alt="Channel"/></div>
+        <div class="chart-box"><div class="chart-label">Gender Distribution</div><img src="/static/csp_eda_charts/06_gender_distribution.png" alt="Gender"/></div>
+        <div class="chart-box large"><div class="chart-label">Satisfaction by Ticket Type</div><img src="/static/csp_eda_charts/07_satisfaction_by_ticket_type.png" alt="Sat by Type"/></div>
+        <div class="chart-box large"><div class="chart-label">Satisfaction by Priority</div><img src="/static/csp_eda_charts/08_satisfaction_by_priority.png" alt="Sat by Priority"/></div>
+        <div class="chart-box full"><div class="chart-label">Feature Correlation Heatmap</div><img src="/static/csp_eda_charts/09_correlation_heatmap.png" alt="Heatmap"/></div>
+        <div class="chart-box full"><div class="chart-label">Response Duration vs Satisfaction</div><img src="/static/csp_eda_charts/10_response_duration_vs_satisfaction.png" alt="Duration"/></div>
+    </div>
+</section>
+
+<section id="features">
+    <div class="section-label">04 — Feature Engineering</div>
+    <h2>Feature <em>Engineering</em></h2>
+    <p>New features crafted, scaling applied, and best features selected using statistical testing to maximize model performance.</p>
+    <div class="fe-grid">
+        <div class="fe-card">
+            <div class="fe-num">3</div>
+            <h3>New Features Created</h3>
+            <ul>
+                <li>Age Group — binned from Customer Age</li>
+                <li>Duration Bucket — binned from Response Duration</li>
+                <li>Purchase Recency — years since product purchase</li>
+            </ul>
+        </div>
+        <div class="fe-card">
+            <div class="fe-num">2</div>
+            <h3>Scalers Applied</h3>
+            <ul>
+                <li>StandardScaler — continuous numeric columns</li>
+                <li>MinMaxScaler — year and month columns</li>
+            </ul>
+        </div>
+        <div class="fe-card">
+            <div class="fe-num">8</div>
+            <h3>Top Features Selected</h3>
+            <ul>
+                <li>SelectKBest with ANOVA F-test</li>
+                <li>Top 8 highest scoring features retained</li>
+                <li>Saved to csp_features_final.csv</li>
+            </ul>
+        </div>
+    </div>
+    <div class="chart-center">
+        <div class="chart-label">Feature Importance — ANOVA F-Score</div>
+        <img src="/static/csp_fe_charts/feature_importance.png" alt="Feature Importance"/>
+    </div>
+</section>
+
+<section id="models">
+    <div class="section-label">05 — Model Building</div>
+    <h2>ML <em>Models</em></h2>
+    <p>Six machine learning classifiers trained, cross-validated, and compared to identify the best performing model.</p>
+    <div class="model-cards">
+        <div class="model-card"><div class="model-icon">LR</div><div class="model-name">Logistic Regression</div><div class="model-type">Linear</div></div>
+        <div class="model-card"><div class="model-icon">DT</div><div class="model-name">Decision Tree</div><div class="model-type">Tree-based</div></div>
+        <div class="model-card best">
+            <div class="best-tag">Best</div>
+            <div class="model-icon">RF</div>
+            <div class="model-name">Random Forest</div>
+            <div class="model-type">Ensemble</div>
+        </div>
+        <div class="model-card"><div class="model-icon">GB</div><div class="model-name">Gradient Boosting</div><div class="model-type">Ensemble</div></div>
+        <div class="model-card"><div class="model-icon">KNN</div><div class="model-name">K-Nearest Neighbors</div><div class="model-type">Instance-based</div></div>
+        <div class="model-card"><div class="model-icon">SVM</div><div class="model-name">Support Vector Machine</div><div class="model-type">Kernel-based</div></div>
+    </div>
+    <div class="table-wrap" style="margin-top:40px">
+        <table>
+            <thead>
+                <tr><th>Model</th><th>Train Accuracy</th><th>Test Accuracy</th><th>CV Mean (5-Fold)</th><th>CV Std</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Logistic Regression</td><td>23.94%</td><td>18.41%</td><td>20.22%</td><td>1.45%</td></tr>
+                <tr><td>Decision Tree</td><td>100.00%</td><td>19.01%</td><td>19.72%</td><td>1.72%</td></tr>
+                <tr class="highlight"><td>Random Forest ★</td><td>100.00%</td><td>18.77%</td><td>20.77%</td><td>0.20%</td></tr>
+                <tr><td>Gradient Boosting</td><td>55.26%</td><td>21.06%</td><td>19.36%</td><td>1.76%</td></tr>
+                <tr><td>K-Nearest Neighbors</td><td>44.63%</td><td>18.77%</td><td>19.86%</td><td>1.06%</td></tr>
+                <tr><td>Support Vector Machine</td><td>25.13%</td><td>21.78%</td><td>20.69%</td><td>1.02%</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section id="evaluation">
+    <div class="section-label">06 — Evaluation</div>
+    <h2>Model <em>Evaluation</em></h2>
+    <p>Comprehensive evaluation using confusion matrix, feature importance ranking, and cross-model accuracy comparison.</p>
+    <div class="eval-grid">
+        <div class="eval-box"><div class="chart-label">Confusion Matrix</div><img src="/static/csp_eval_charts/01_confusion_matrix.png" alt="Confusion Matrix"/></div>
+        <div class="eval-box"><div class="chart-label">Feature Importance</div><img src="/static/csp_eval_charts/02_feature_importance.png" alt="Feature Importance"/></div>
+        <div class="eval-box full"><div class="chart-label">Model Comparison — Train vs Test Accuracy</div><img src="/static/csp_eval_charts/03_model_comparison.png" alt="Model Comparison"/></div>
+    </div>
+</section>
+
+<!-- PREDICTION SECTION -->
+<section id="predict">
+    <div class="section-label">07 — Live Prediction</div>
+    <h2>Predict <em>Satisfaction</em></h2>
+    <p>Fill in the ticket details below and our Random Forest model will predict the customer satisfaction rating instantly.</p>
+
+    <div class="predict-box">
+        <div class="predict-grid">
+            <div class="input-group">
+                <label>Customer Age</label>
+                <input type="number" id="customer_age" min="18" max="70" placeholder="e.g. 35"/>
+            </div>
+            <div class="input-group">
+                <label>Ticket Type</label>
+                <select id="ticket_type">
+                    <option value="">Select type</option>
+                    <option>Billing inquiry</option>
+                    <option>Cancellation request</option>
+                    <option>Product inquiry</option>
+                    <option>Refund request</option>
+                    <option>Technical issue</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Ticket Subject</label>
+                <select id="ticket_subject">
+                    <option value="">Select subject</option>
+                    <option>Battery life</option>
+                    <option>Cancellation request</option>
+                    <option>Data loss</option>
+                    <option>Delivery problem</option>
+                    <option>Hardware issue</option>
+                    <option>Installation support</option>
+                    <option>Network problem</option>
+                    <option>Payment issue</option>
+                    <option>Product compatibility</option>
+                    <option>Product setup</option>
+                    <option>Refund request</option>
+                    <option>Software bug</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Ticket Status</label>
+                <select id="ticket_status">
+                    <option value="">Select status</option>
+                    <option>Closed</option>
+                    <option>Open</option>
+                    <option>Pending Customer Response</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Ticket Priority</label>
+                <select id="ticket_priority">
+                    <option value="">Select priority</option>
+                    <option>Critical</option>
+                    <option>High</option>
+                    <option>Low</option>
+                    <option>Medium</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Ticket Channel</label>
+                <select id="ticket_channel">
+                    <option value="">Select channel</option>
+                    <option>Chat</option>
+                    <option>Email</option>
+                    <option>Phone</option>
+                    <option>Social media</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Response Duration (hrs)</label>
+                <input type="number" id="response_duration" min="0" max="100" placeholder="e.g. 12"/>
+            </div>
+            <div class="input-group">
+                <label>Purchase Year</label>
+                <input type="number" id="purchase_year" min="2018" max="2024" placeholder="e.g. 2021"/>
+            </div>
+            <div class="input-group">
+                <label>Purchase Month</label>
+                <input type="number" id="purchase_month" min="1" max="12" placeholder="e.g. 6"/>
+            </div>
+        </div>
+
+        <button class="predict-btn" onclick="predict()">
+            <span>Predict Satisfaction</span>
+            <div class="btn-glow"></div>
+        </button>
+
+        <div class="result-box" id="result-box">
+            <div class="result-inner">
+                <div class="result-label">Predicted Rating</div>
+                <div class="result-stars" id="result-stars"></div>
+                <div class="result-score" id="result-score"></div>
+                <div class="result-message" id="result-message"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="conclusion">
+    <div class="section-label">08 — Conclusion</div>
+    <h2>Key <em>Findings</em></h2>
+    <p>Insights derived from the complete machine learning pipeline applied to customer support ticket data.</p>
+    <div class="conclusion-grid">
+        <div class="conc-card">
+            <div class="conc-num">01</div>
+            <h3>Key Findings</h3>
+            <ul>
+                <li>Ticket Priority and Type are the most influential predictors</li>
+                <li>Response Duration significantly impacts satisfaction</li>
+                <li>Satisfaction ratings are evenly spread across 1–5</li>
+                <li>Dataset shows weak predictive signal from metadata alone</li>
+            </ul>
+        </div>
+        <div class="conc-card gold">
+            <div class="conc-num">02</div>
+            <h3>Best Model</h3>
+            <p>Random Forest achieved the most stable cross-validation score of 20.77%. All models show similar accuracy suggesting NLP on ticket descriptions would significantly improve results.</p>
+        </div>
+        <div class="conc-card">
+            <div class="conc-num">03</div>
+            <h3>Future Improvements</h3>
+            <ul>
+                <li>Apply NLP on Ticket Description text</li>
+                <li>Hyperparameter tuning with GridSearchCV</li>
+                <li>Experiment with XGBoost and LightGBM</li>
+                <li>Deploy as web app using Flask or FastAPI</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+</main>
+
+<footer>
+    <div class="footer-line"></div>
+    <div class="footer-logo">CSP</div>
+    <p>Customer Satisfaction Prediction · Machine Learning Project</p>
+    <small>Python · Scikit-learn · Pandas · Data Science Domain</small>
+</footer>
+
+<script>
+    const loader = document.getElementById('loader');
+    window.addEventListener('load', () => { setTimeout(() => loader.classList.add('hidden'), 900); });
+
+    const cursor = document.getElementById('cursor');
+    const follower = document.getElementById('cursor-follower');
+    document.addEventListener('mousemove', e => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+        setTimeout(() => {
+            follower.style.left = e.clientX + 'px';
+            follower.style.top = e.clientY + 'px';
+        }, 80);
+    });
+    document.querySelectorAll('a, .card, .stat-card, .chart-box, .model-card, .predict-btn').forEach(el => {
+        el.addEventListener('mouseenter', () => cursor.classList.add('active'));
+        el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+    });
+
+    window.addEventListener('scroll', () => {
+        document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 80);
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('section, .card, .stat-card, .chart-box, .fe-card, .model-card, .conc-card, .eval-box').forEach(el => {
+        observer.observe(el);
+    });
+
+    async function predict() {
+        const btn = document.querySelector('.predict-btn span');
+        btn.textContent = 'Predicting...';
+
+        const data = {
+            customer_age:      document.getElementById('customer_age').value,
+            ticket_type:       document.getElementById('ticket_type').value,
+            ticket_subject:    document.getElementById('ticket_subject').value,
+            ticket_status:     document.getElementById('ticket_status').value,
+            ticket_priority:   document.getElementById('ticket_priority').value,
+            ticket_channel:    document.getElementById('ticket_channel').value,
+            response_duration: document.getElementById('response_duration').value,
+            purchase_year:     document.getElementById('purchase_year').value,
+            purchase_month:    document.getElementById('purchase_month').value
+        };
+
+        if (Object.values(data).some(v => !v)) {
+            alert('Please fill in all fields!');
+            btn.textContent = 'Predict Satisfaction';
+            return;
+        }
+
+        try {
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                const box     = document.getElementById('result-box');
+                const stars   = document.getElementById('result-stars');
+                const score   = document.getElementById('result-score');
+                const message = document.getElementById('result-message');
+
+                stars.textContent   = '★'.repeat(result.prediction) + '☆'.repeat(5 - result.prediction);
+                score.textContent   = result.prediction + ' / 5';
+                message.textContent = result.message;
+
+                box.classList.add('show');
+
+                const colors = { 1:'#e74c3c', 2:'#e67e22', 3:'#f1c40f', 4:'#2ecc71', 5:'#c9a84c' };
+                score.style.color = colors[result.prediction];
+                stars.style.color = colors[result.prediction];
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (err) {
+            alert('Connection error. Make sure Flask is running!');
+        }
+
+        btn.textContent = 'Predict Satisfaction';
+    }
+</script>
+
+</body>
+</html>

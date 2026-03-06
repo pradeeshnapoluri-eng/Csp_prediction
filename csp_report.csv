@@ -1,0 +1,15 @@
+Metric,Value,Rating,Count,Percentage
+=== DATASET SUMMARY ===,,,,
+Total Rows (Raw),8469,,,
+Total Columns (Raw),17,,,
+Rows After Cleaning,2769,,,
+Columns After Cleaning,12,,,
+Missing Values (Raw),5700,,,
+Duplicate Rows,0,,,
+,,,,
+,,=== SATISFACTION DISTRIBUTION ===,,
+,,1,553,19.97
+,,2,549,19.83
+,,3,580,20.95
+,,4,543,19.61
+,,5,544,19.65

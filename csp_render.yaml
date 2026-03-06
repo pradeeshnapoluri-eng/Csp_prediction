@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: csp-prediction
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    plan: free
+```
+
+**Step 3 — Create GitHub repo**
+
+1. Go to `https://github.com`
+2. Sign in or create free account
+3. Click **New Repository**
+4. Name it `csp-prediction`
+5. Click **Create Repository**
+
+**Step 4 — Push your project to GitHub**
+
+Open terminal in `h:\CSP_ML\` and run:
+```
+git init
+git add .
+git commit -m "CSP ML Project"
+git branch -M main
+git remote add origin https://github.com/YOURUSERNAME/csp-prediction.git
+git push -u origin main

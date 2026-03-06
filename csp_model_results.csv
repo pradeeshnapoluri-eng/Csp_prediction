@@ -1,0 +1,7 @@
+Model,Train Accuracy,Test Accuracy,CV Mean Acc,CV Std
+Support Vector Machine,25.13,21.78,20.69,1.02
+Gradient Boosting,55.26,21.06,19.36,1.76
+Decision Tree,100.0,19.01,19.72,1.72
+Random Forest,100.0,18.77,20.77,0.2
+K-Nearest Neighbors,44.63,18.77,19.86,1.06
+Logistic Regression,23.94,18.41,20.22,1.45
