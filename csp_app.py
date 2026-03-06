@@ -70,47 +70,41 @@ def predict():
         purchase_year     = int(data["purchase_year"])
         purchase_month    = int(data["purchase_month"])
 
-        age_group      = 1 if customer_age <= 25 else 2 if customer_age <= 35 else 3 if customer_age <= 50 else 4 if customer_age <= 65 else 5
+        age_group       = 1 if customer_age <= 25 else 2 if customer_age <= 35 else 3 if customer_age <= 50 else 4 if customer_age <= 65 else 5
         duration_bucket = min(int(response_duration / 5) + 1, 5)
         purchase_recency = 2024 - purchase_year
 
-        features = np.array([[
-            customer_age, ticket_type, ticket_subject,
-            ticket_status, ticket_priority, ticket_channel,
-            response_duration, purchase_month,
-            age_group, duration_bucket, purchase_recency
-        ]])
+        # Match EXACT feature names from training
+        df = pd.DataFrame([{
+            'Ticket Type':            ticket_type,
+            'Ticket Subject':         ticket_subject,
+            'Ticket Channel':         ticket_channel,
+            'Customer Age':           customer_age,
+            'Purchase Month':         purchase_month,
+            'Customer Gender':        1,
+            'Duration Bucket':        duration_bucket,
+            'Purchase Recency':       purchase_recency,
+            'Purchase Year':          purchase_year,
+            'Ticket Priority':        ticket_priority,
+            'Ticket Status':          ticket_status,
+            'Age Group':              age_group,
+            'Response Duration (hrs)':response_duration,
+        }])
 
-        feature_names = [
-            'Customer Age', 'Ticket Type', 'Ticket Subject',
-            'Ticket Status', 'Ticket Priority', 'Ticket Channel',
-            'Response Duration (hrs)', 'Purchase Month',
-            'Age Group', 'Duration Bucket', 'Purchase Recency'
-        ]
+        # Load feature list from training
+        import os
+        if os.path.exists("csp_features_final.csv"):
+            train_cols = pd.read_csv("csp_features_final.csv").drop(
+    columns=['Satisfaction Rating', 'Customer Satisfaction Rating'], errors='ignore').columns.tolist()
+            df = df.reindex(columns=train_cols, fill_value=0)
 
-        df = pd.DataFrame(features, columns=feature_names)
+        prediction = model.predict(df)[0]
 
-        top_features = ['Ticket Subject', 'Product Purchased',
-                        'Ticket Type', 'Ticket Priority',
-                        'Customer Age', 'Ticket Channel',
-                        'Ticket Status', 'Purchase Month']
+        messages = {1:"Very Dissatisfied",2:"Dissatisfied",3:"Neutral",4:"Satisfied",5:"Very Satisfied"}
 
-        available = [f for f in top_features if f in df.columns]
-        df_input  = df[available]
-        prediction = model.predict(df_input)[0]
-        messages = {
-            1: "Very Dissatisfied",
-            2: "Dissatisfied",
-            3: "Neutral",
-            4: "Satisfied",
-            5: "Very Satisfied"
-        }
-        return jsonify({
-            "prediction": int(prediction),
-            "message": messages.get(int(prediction), "Unknown"),
-            "status": "success"
-        })
+        return jsonify({"prediction":int(prediction),"message":messages.get(int(prediction),"Unknown"),"status":"success"})
+
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)})
+        return jsonify({"status":"error","message":str(e)})
 if __name__ == "__main__":
     app.run(debug=True)

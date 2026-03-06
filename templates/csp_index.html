@@ -1,59 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Customer Satisfaction Prediction</title>
-    <link rel="stylesheet" href="/static/csp_style.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Customer Satisfaction Prediction</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#07070f;--bg2:#0d0d18;--card:#111120;--card-h:#161628;--gold:#c8a84b;--gold-l:#e8c97a;--gold-d:#8a6820;--gold-dim:rgba(200,168,75,0.1);--gold-glow:rgba(200,168,75,0.07);--text:#edeae0;--text2:#9a9688;--text3:#4e4c46;--border:rgba(200,168,75,0.16);--border2:rgba(255,255,255,0.05);--r:12px;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.8;font-weight:300;cursor:none;background-image:radial-gradient(ellipse 70% 40% at 15% 0%,rgba(200,168,75,0.05) 0%,transparent 60%),radial-gradient(ellipse 50% 30% at 85% 100%,rgba(200,168,75,0.04) 0%,transparent 60%);}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:10px;}
+
+.loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity 0.7s,visibility 0.7s;}
+.loader.out{opacity:0;visibility:hidden;pointer-events:none;}
+.loader-ring{width:52px;height:52px;border:1px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loader-text{font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--gold);letter-spacing:0.4em;}
+
+.cursor{position:fixed;width:7px;height:7px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s;}
+.cursor.big{width:18px;height:18px;background:transparent;border:1px solid var(--gold);}
+.cursor-trail{position:fixed;width:30px;height:30px;border:1px solid rgba(200,168,75,0.25);border-radius:50%;pointer-events:none;z-index:9997;transform:translate(-50%,-50%);transition:left 0.1s,top 0.1s;}
+
+header{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 40px;position:relative;overflow:hidden;}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border2) 1px,transparent 1px),linear-gradient(90deg,var(--border2) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);}
+.hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 40%,rgba(200,168,75,0.07) 0%,transparent 70%);}
+.hero-content{position:relative;z-index:1;max-width:860px;}
+.hero-pill{display:inline-block;border:1px solid var(--border);color:var(--gold);font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;padding:8px 24px;border-radius:50px;margin-bottom:36px;background:var(--gold-dim);animation:fadeD 0.8s ease both;}
+header h1{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,7vw,6rem);font-weight:700;line-height:1.0;letter-spacing:-0.02em;color:var(--text);margin-bottom:24px;animation:fadeD 0.8s 0.1s ease both;}
+header h1 em{font-style:italic;background:linear-gradient(135deg,var(--gold-l),var(--gold),var(--gold-d));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-content>p{color:var(--text2);font-size:1rem;max-width:520px;margin:0 auto 40px;animation:fadeD 0.8s 0.2s ease both;}
+.hero-cta{display:flex;gap:14px;justify-content:center;margin-bottom:52px;animation:fadeD 0.8s 0.3s ease both;flex-wrap:wrap;}
+.btn-primary{display:inline-block;padding:14px 32px;background:linear-gradient(135deg,var(--gold-d),var(--gold));color:var(--bg);font-weight:500;font-size:0.82rem;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;border-radius:50px;transition:all 0.3s;}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(200,168,75,0.3);}
+.btn-ghost{display:inline-block;padding:14px 32px;border:1px solid var(--border);color:var(--gold);font-size:0.82rem;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;border-radius:50px;transition:all 0.3s;}
+.btn-ghost:hover{background:var(--gold-dim);transform:translateY(-3px);}
+.hero-metrics{display:flex;align-items:center;justify-content:center;border:1px solid var(--border2);border-radius:var(--r);background:rgba(13,13,24,0.7);backdrop-filter:blur(12px);overflow:hidden;animation:fadeD 0.8s 0.4s ease both;flex-wrap:wrap;}
+.metric{padding:22px 32px;text-align:center;}
+.metric span{display:block;font-family:'Cormorant Garamond',serif;font-size:1.7rem;color:var(--gold);font-weight:600;}
+.metric small{display:block;font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);margin-top:2px;}
+.metric-sep{width:1px;background:var(--border2);height:50px;}
+.hero-scroll{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text3);font-size:0.68rem;letter-spacing:0.2em;text-transform:uppercase;animation:fadeD 1s 0.6s ease both;}
+.scroll-bar{width:1px;height:44px;background:linear-gradient(to bottom,var(--gold),transparent);animation:pulse 2s ease infinite;}
+@keyframes pulse{0%,100%{opacity:0.3}50%{opacity:1}}
+
+nav{position:sticky;top:0;z-index:100;padding:0 40px;background:rgba(7,7,15,0.4);backdrop-filter:blur(20px);border-bottom:1px solid transparent;transition:all 0.3s;}
+nav.stuck{background:rgba(7,7,15,0.92);border-bottom-color:var(--border2);}
+.nav-wrap{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 0;}
+.nav-brand{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);font-weight:700;letter-spacing:0.2em;display:flex;align-items:center;gap:8px;}
+.brand-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;display:inline-block;}
+.nav-menu{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.nav-menu a{color:var(--text2);text-decoration:none;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:400;padding:7px 14px;border-radius:50px;border:1px solid transparent;transition:all 0.3s;}
+.nav-menu a:hover{color:var(--gold);border-color:var(--border);background:var(--gold-dim);}
+.nav-cta{background:var(--gold-dim)!important;border-color:var(--border)!important;color:var(--gold)!important;margin-left:8px;}
+.nav-cta:hover{background:linear-gradient(135deg,var(--gold-d),var(--gold))!important;color:var(--bg)!important;}
+
+main{max-width:1280px;margin:0 auto;padding:0 40px 100px;}
+
+section{padding:90px 0;border-bottom:1px solid var(--border2);opacity:0;transform:translateY(24px);transition:opacity 0.7s,transform 0.7s;}
+section.shown{opacity:1;transform:translateY(0);}
+section:last-child{border-bottom:none;}
+.sec-tag{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+section h2{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,3.5vw,3.2rem);font-weight:700;line-height:1.1;color:var(--text);margin-bottom:10px;}
+section h2 em{font-style:italic;color:var(--gold-l);}
+.sec-sub{color:var(--text2);margin:14px 0 48px;max-width:560px;font-size:0.93rem;}
+
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-top:40px;}
+.g-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:28px 24px;transition:all 0.35s;position:relative;overflow:hidden;opacity:0;transform:translateY(16px);}
+.g-card.shown{opacity:1;transform:translateY(0);}
+.g-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity 0.3s;}
+.g-card:hover{background:var(--card-h);border-color:var(--border);transform:translateY(-4px);box-shadow:0 0 40px var(--gold-glow);}
+.g-card:hover::before{opacity:1;}
+.g-card-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.g-icon{font-size:1.3rem;color:var(--gold);}
+.g-card h3{font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--gold-l);font-weight:600;}
+.g-card p{color:var(--text2);font-size:0.87rem;line-height:1.7;}
+
+.flow-bar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:48px;padding:24px 28px;background:var(--card);border:1px solid var(--border2);border-radius:var(--r);}
+.flow-step{text-align:center;}
+.flow-step span{display:block;font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--gold);font-weight:600;}
+.flow-step p{font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);}
+.flow-arr{color:var(--gold);font-size:1rem;opacity:0.35;}
+
+.stat-strip{display:flex;align-items:stretch;flex-wrap:wrap;border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;margin-top:40px;}
+.stat-item{flex:1;min-width:130px;padding:36px 20px;text-align:center;transition:background 0.3s;opacity:0;transform:translateY(14px);}
+.stat-item.shown{opacity:1;transform:translateY(0);}
+.stat-item:hover{background:var(--card);}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:2.4rem;color:var(--gold);font-weight:600;}
+.stat-lbl{font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);margin-top:4px;}
+.stat-div{width:1px;background:var(--border2);}
+
+.tbl-wrap{border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;margin-top:36px;}
+table{width:100%;border-collapse:collapse;font-size:0.86rem;}
+thead tr{background:var(--card);border-bottom:1px solid var(--border);}
+thead th{padding:14px 18px;text-align:left;color:var(--gold);font-weight:400;letter-spacing:0.1em;text-transform:uppercase;font-size:0.7rem;}
+tbody tr{border-bottom:1px solid var(--border2);transition:background 0.2s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--card);}
+tbody tr.best-row{background:var(--gold-dim);}
+tbody tr.best-row td{color:var(--gold-l);}
+tbody td{padding:13px 18px;color:var(--text2);}
+tbody td:first-child{color:var(--text);font-weight:400;}
+.tag{font-size:0.68rem;padding:3px 10px;border-radius:50px;font-weight:500;letter-spacing:0.06em;}
+.tag.num{background:rgba(100,150,255,0.08);color:#7aacff;border:1px solid rgba(100,150,255,0.18);}
+.tag.cat{background:rgba(150,100,255,0.08);color:#b07aff;border:1px solid rgba(150,100,255,0.18);}
+.tag.tgt{background:var(--gold-dim);color:var(--gold);border:1px solid var(--border);}
+
+.chart-mosaic{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:40px;}
+.cm-lg,.cm-sm,.cm-full{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:18px;transition:all 0.35s;overflow:hidden;opacity:0;transform:translateY(14px);}
+.cm-lg.shown,.cm-sm.shown,.cm-full.shown{opacity:1;transform:translateY(0);}
+.cm-lg{grid-column:span 2;}
+.cm-full{grid-column:span 4;}
+.cm-lg:hover,.cm-sm:hover,.cm-full:hover{border-color:var(--border);transform:translateY(-3px);box-shadow:0 16px 50px rgba(0,0,0,0.6);}
+.cm-lbl{font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;}
+.cm-lg img,.cm-sm img,.cm-full img,.ev-half img,.ev-full img{width:100%;border-radius:8px;display:block;filter:brightness(0.88) saturate(1.1);transition:filter 0.35s;}
+.cm-lg:hover img,.cm-sm:hover img,.cm-full:hover img,.ev-half:hover img,.ev-full:hover img{filter:brightness(1) saturate(1.2);}
+
+.fe-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:40px;}
+.fe-block{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:32px 26px;position:relative;overflow:hidden;transition:all 0.35s;opacity:0;transform:translateY(14px);}
+.fe-block.shown{opacity:1;transform:translateY(0);}
+.fe-block:hover{border-color:var(--border);transform:translateY(-4px);box-shadow:0 0 40px var(--gold-glow);}
+.fe-big{font-family:'Cormorant Garamond',serif;font-size:5rem;font-weight:700;color:transparent;-webkit-text-stroke:1px var(--border2);position:absolute;top:10px;right:18px;line-height:1;}
+.fe-block h3{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--gold-l);margin-bottom:14px;font-weight:600;}
+.fe-block ul{padding:0;list-style:none;}
+.fe-block li{color:var(--text2);font-size:0.86rem;padding-left:14px;margin-bottom:7px;position:relative;}
+.fe-block li::before{content:'—';position:absolute;left:0;color:var(--gold);font-size:0.68rem;}
+.img-center{text-align:center;margin-top:40px;}
+.img-center img{max-width:760px;width:100%;border-radius:var(--r);border:1px solid var(--border2);filter:brightness(0.88);transition:all 0.35s;}
+.img-center img:hover{border-color:var(--border);filter:brightness(1);}
+
+.model-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-top:40px;}
+.m-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:28px 16px;text-align:center;transition:all 0.35s;position:relative;opacity:0;transform:translateY(14px);}
+.m-card.shown{opacity:1;transform:translateY(0);}
+.m-card:hover{border-color:var(--border);transform:translateY(-4px);}
+.m-card.m-best{border-color:var(--gold);background:var(--gold-dim);box-shadow:0 0 40px var(--gold-glow);}
+.m-badge{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--bg);font-size:0.6rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;padding:3px 12px;border-radius:50px;}
+.m-abbr{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.m-name{font-size:0.8rem;color:var(--text);font-weight:400;margin-bottom:5px;}
+.m-type{font-size:0.68rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;}
+
+.eval-mosaic{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:40px;}
+.ev-half,.ev-full{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:20px;transition:all 0.35s;opacity:0;transform:translateY(14px);}
+.ev-half.shown,.ev-full.shown{opacity:1;transform:translateY(0);}
+.ev-full{grid-column:span 2;}
+.ev-half:hover,.ev-full:hover{border-color:var(--border);transform:translateY(-3px);box-shadow:0 16px 50px rgba(0,0,0,0.6);}
+
+.predict-panel{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;margin-top:40px;}
+.predict-left{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:36px;}
+.p-section-title{font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid var(--border2);}
+.p-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.p-field{display:flex;flex-direction:column;gap:7px;}
+.p-field label{font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);}
+.select-wrap{position:relative;}
+.select-wrap select,.p-field input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:11px 14px;color:var(--text);font-family:'Outfit',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.3s;-webkit-appearance:none;appearance:none;}
+.select-wrap select:focus,.p-field input:focus{border-color:var(--gold);}
+.select-wrap select option{background:var(--bg2);color:var(--text);}
+.sel-arrow{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--gold);font-size:1rem;pointer-events:none;}
+.p-btn{width:100%;margin-top:28px;padding:16px;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--gold-d),var(--gold));border:none;border-radius:var(--r);color:var(--bg);font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;letter-spacing:0.08em;cursor:pointer;transition:all 0.3s;}
+.p-btn:hover{transform:translateY(-2px);box-shadow:0 10px 40px rgba(200,168,75,0.35);}
+.p-btn.loading{opacity:0.7;pointer-events:none;}
+.p-btn-shine{position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,0.15),transparent 60%);transform:translateX(-100%);transition:transform 0.6s;}
+.p-btn:hover .p-btn-shine{transform:translateX(100%);}
+.predict-right{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);display:flex;align-items:center;justify-content:center;min-height:400px;}
+.result-idle{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px;text-align:center;color:var(--text3);}
+.idle-icon{font-size:2.5rem;color:var(--border);}
+.result-idle p{font-size:0.88rem;max-width:220px;line-height:1.6;}
+.result-show{display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px;text-align:center;width:100%;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;}
+.res-label{font-size:0.68rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text3);}
+.res-stars{font-size:2.2rem;letter-spacing:6px;transition:color 0.5s;}
+.res-num{font-family:'Cormorant Garamond',serif;font-size:4rem;font-weight:700;line-height:1;transition:color 0.5s;}
+.res-msg{font-size:1rem;color:var(--text2);letter-spacing:0.06em;}
+.res-bar-wrap{width:100%;height:4px;background:var(--border2);border-radius:4px;overflow:hidden;}
+.res-bar{height:100%;width:0%;border-radius:4px;transition:width 0.8s cubic-bezier(0.22,1,0.36,1);}
+.res-hint{font-size:0.7rem;color:var(--text3);letter-spacing:0.1em;}
+.p-btn-reset{margin-top:8px;padding:10px 24px;background:transparent;border:1px solid var(--border);color:var(--gold);border-radius:50px;font-family:'Outfit',sans-serif;font-size:0.78rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.3s;}
+.p-btn-reset:hover{background:var(--gold-dim);}
+
+.conc-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:40px;}
+.conc-block{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:34px 28px;position:relative;overflow:hidden;transition:all 0.35s;opacity:0;transform:translateY(14px);}
+.conc-block.shown{opacity:1;transform:translateY(0);}
+.conc-block:hover{border-color:var(--border);transform:translateY(-4px);box-shadow:0 0 40px var(--gold-glow);}
+.conc-block.conc-gold{border-color:var(--gold);background:var(--gold-dim);}
+.conc-n{font-family:'Cormorant Garamond',serif;font-size:4.5rem;font-weight:700;color:transparent;-webkit-text-stroke:1px var(--border2);position:absolute;top:12px;right:18px;line-height:1;}
+.conc-block h3{font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--gold-l);margin-bottom:14px;font-weight:600;position:relative;z-index:1;}
+.conc-block p{color:var(--text2);font-size:0.87rem;line-height:1.8;position:relative;z-index:1;}
+.conc-block ul{padding:0;list-style:none;position:relative;z-index:1;}
+.conc-block li{color:var(--text2);font-size:0.86rem;padding-left:14px;margin-bottom:7px;position:relative;}
+.conc-block li::before{content:'—';position:absolute;left:0;color:var(--gold);font-size:0.68rem;}
+
+footer{text-align:center;padding:60px 40px;border-top:1px solid var(--border2);}
+.ft-top{width:36px;height:1px;background:var(--gold);margin:0 auto 22px;}
+.ft-brand{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold);letter-spacing:0.3em;font-weight:600;margin-bottom:14px;}
+footer p{font-size:0.78rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
+footer small{font-size:0.68rem;color:var(--text3);opacity:0.5;letter-spacing:0.1em;}
+
+@keyframes fadeD{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
+
+@media(max-width:1024px){.chart-mosaic{grid-template-columns:repeat(2,1fr);}.cm-lg,.cm-full{grid-column:span 2;}.predict-panel{grid-template-columns:1fr;}.predict-right{min-height:300px;}}
+@media(max-width:768px){main{padding:0 20px 60px;}header{padding:60px 20px;min-height:auto;}nav{padding:0 20px;}.nav-menu{display:none;}.hero-cta{flex-direction:column;align-items:center;}.hero-metrics{flex-direction:column;}.metric-sep{width:100%;height:1px;}.chart-mosaic{grid-template-columns:1fr;}.cm-lg,.cm-full{grid-column:span 1;}.eval-mosaic{grid-template-columns:1fr;}.ev-full{grid-column:span 1;}.p-grid{grid-template-columns:1fr;}section{padding:60px 0;}}
+</style>
 </head>
 <body>
 
 <div class="loader" id="loader">
-    <div class="loader-inner">
-        <div class="loader-line"></div>
-        <span>CSP</span>
-    </div>
+    <div class="loader-ring"></div>
+    <div class="loader-text">CSP</div>
 </div>
 
 <div class="cursor" id="cursor"></div>
-<div class="cursor-follower" id="cursor-follower"></div>
+<div class="cursor-trail" id="cursor-trail"></div>
 
-<header>
-    <div class="header-bg"></div>
-    <div class="header-content">
-        <div class="header-badge">Machine Learning · Data Science · Python</div>
-        <h1>Customer Satisfaction<br/><em>Prediction</em></h1>
-        <p class="header-sub">Predicting customer satisfaction using advanced ML algorithms on support ticket data</p>
-        <div class="header-stats">
-            <div class="hs"><span>8,469</span><small>Records</small></div>
-            <div class="hs-div"></div>
-            <div class="hs"><span>6</span><small>ML Models</small></div>
-            <div class="hs-div"></div>
-            <div class="hs"><span>17</span><small>Features</small></div>
-            <div class="hs-div"></div>
-            <div class="hs"><span>Advanced</span><small>Difficulty</small></div>
+<header id="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+        <div class="hero-pill">Machine Learning &nbsp;·&nbsp; Data Science &nbsp;·&nbsp; Python</div>
+        <h1>Customer<br/><em>Satisfaction</em><br/>Prediction</h1>
+        <p>An advanced ML pipeline predicting customer satisfaction ratings from support ticket data using ensemble learning.</p>
+        <div class="hero-cta">
+            <a href="#predict" class="btn-primary">Try Live Prediction</a>
+            <a href="#overview" class="btn-ghost">View Project</a>
         </div>
-        <a href="#predict" class="hero-btn">Try Prediction</a>
+        <div class="hero-metrics">
+            <div class="metric"><span>8,469</span><small>Records</small></div>
+            <div class="metric-sep"></div>
+            <div class="metric"><span>6</span><small>Models</small></div>
+            <div class="metric-sep"></div>
+            <div class="metric"><span>17</span><small>Features</small></div>
+            <div class="metric-sep"></div>
+            <div class="metric"><span>20.77%</span><small>CV Score</small></div>
+        </div>
     </div>
-    <div class="scroll-hint">
-        <div class="scroll-line"></div>
-        <span>Scroll</span>
-    </div>
+    <div class="hero-scroll"><div class="scroll-bar"></div><span>scroll</span></div>
 </header>
 
 <nav id="nav">
-    <div class="nav-inner">
-        <div class="nav-logo">CSP</div>
-        <div class="nav-links">
+    <div class="nav-wrap">
+        <div class="nav-brand"><span class="brand-dot"></span>CSP</div>
+        <div class="nav-menu">
             <a href="#overview">Overview</a>
             <a href="#dataset">Dataset</a>
             <a href="#eda">EDA</a>
             <a href="#features">Features</a>
             <a href="#models">Models</a>
             <a href="#evaluation">Evaluation</a>
-            <a href="#predict">Predict</a>
-            <a href="#conclusion">Conclusion</a>
+            <a href="#predict" class="nav-cta">Predict</a>
         </div>
     </div>
 </nav>
@@ -61,157 +253,114 @@
 <main>
 
 <section id="overview">
-    <div class="section-label">01 — Overview</div>
+    <div class="sec-tag">01 &mdash; Overview</div>
     <h2>Project <em>Overview</em></h2>
-    <p>A multiclass classification problem aimed at predicting customer satisfaction ratings using historical support ticket data, feature engineering, and ensemble machine learning models.</p>
-    <div class="card-row">
-        <div class="card">
-            <div class="card-icon">◎</div>
-            <h3>Goal</h3>
-            <p>Predict customer satisfaction rating on a scale of 1 to 5 based on support ticket attributes and customer demographics.</p>
-        </div>
-        <div class="card">
-            <div class="card-icon">◈</div>
-            <h3>Domain</h3>
-            <p>Customer Support Analytics · Data Science · Natural Language Processing</p>
-        </div>
-        <div class="card">
-            <div class="card-icon">◇</div>
-            <h3>Tools</h3>
-            <p>Python · Scikit-learn · Pandas · Matplotlib · Seaborn · VS Code · SQL</p>
-        </div>
-        <div class="card">
-            <div class="card-icon">◉</div>
-            <h3>Pipeline</h3>
-            <p>Preprocessing → EDA → Feature Engineering → Model Building → Evaluation → Report</p>
-        </div>
+    <p class="sec-sub">A multiclass classification problem predicting customer satisfaction on a scale of 1–5 using support ticket metadata, feature engineering, and six ML algorithms.</p>
+    <div class="grid-4">
+        <div class="g-card"><div class="g-card-top"><div class="g-icon">◎</div><h3>Goal</h3></div><p>Predict satisfaction rating (1–5) from ticket attributes and customer demographics.</p></div>
+        <div class="g-card"><div class="g-card-top"><div class="g-icon">◈</div><h3>Domain</h3></div><p>Customer Support Analytics · Data Science · NLP</p></div>
+        <div class="g-card"><div class="g-card-top"><div class="g-icon">◇</div><h3>Tools</h3></div><p>Python · Scikit-learn · Pandas · Matplotlib · Seaborn · Flask · SQL</p></div>
+        <div class="g-card"><div class="g-card-top"><div class="g-icon">◉</div><h3>Pipeline</h3></div><p>Preprocessing → EDA → Feature Engineering → Modeling → Evaluation</p></div>
     </div>
-    <div class="process-flow">
-        <div class="pf-step"><div class="pf-num">01</div><div class="pf-label">Data Preprocessing</div></div>
-        <div class="pf-arrow">→</div>
-        <div class="pf-step"><div class="pf-num">02</div><div class="pf-label">EDA</div></div>
-        <div class="pf-arrow">→</div>
-        <div class="pf-step"><div class="pf-num">03</div><div class="pf-label">Feature Engineering</div></div>
-        <div class="pf-arrow">→</div>
-        <div class="pf-step"><div class="pf-num">04</div><div class="pf-label">Model Building</div></div>
-        <div class="pf-arrow">→</div>
-        <div class="pf-step"><div class="pf-num">05</div><div class="pf-label">Evaluation</div></div>
+    <div class="flow-bar">
+        <div class="flow-step"><span>01</span><p>Preprocessing</p></div>
+        <div class="flow-arr">&#8594;</div>
+        <div class="flow-step"><span>02</span><p>EDA</p></div>
+        <div class="flow-arr">&#8594;</div>
+        <div class="flow-step"><span>03</span><p>Feature Eng.</p></div>
+        <div class="flow-arr">&#8594;</div>
+        <div class="flow-step"><span>04</span><p>Modeling</p></div>
+        <div class="flow-arr">&#8594;</div>
+        <div class="flow-step"><span>05</span><p>Evaluation</p></div>
     </div>
 </section>
 
 <section id="dataset">
-    <div class="section-label">02 — Dataset</div>
+    <div class="sec-tag">02 &mdash; Dataset</div>
     <h2>Dataset <em>Summary</em></h2>
-    <p>Customer Support Ticket Dataset containing tech product support inquiries with rich metadata including ticket type, priority, channel, and satisfaction ratings.</p>
-    <div class="stat-row">
-        <div class="stat-card"><div class="stat-ring"></div><h3>8,469</h3><p>Total Records</p></div>
-        <div class="stat-card"><div class="stat-ring"></div><h3>17</h3><p>Raw Features</p></div>
-        <div class="stat-card"><div class="stat-ring"></div><h3>2,769</h3><p>Rated Tickets</p></div>
-        <div class="stat-card"><div class="stat-ring"></div><h3>1 — 5</h3><p>Rating Scale</p></div>
-        <div class="stat-card"><div class="stat-ring"></div><h3>0</h3><p>Duplicate Rows</p></div>
+    <p class="sec-sub">Customer Support Ticket Dataset with rich ticket metadata, demographics, and satisfaction ratings.</p>
+    <div class="stat-strip">
+        <div class="stat-item"><div class="stat-num">8,469</div><div class="stat-lbl">Total Records</div></div>
+        <div class="stat-div"></div>
+        <div class="stat-item"><div class="stat-num">17</div><div class="stat-lbl">Raw Features</div></div>
+        <div class="stat-div"></div>
+        <div class="stat-item"><div class="stat-num">2,769</div><div class="stat-lbl">Rated Tickets</div></div>
+        <div class="stat-div"></div>
+        <div class="stat-item"><div class="stat-num">1–5</div><div class="stat-lbl">Rating Scale</div></div>
+        <div class="stat-div"></div>
+        <div class="stat-item"><div class="stat-num">0</div><div class="stat-lbl">Duplicates</div></div>
     </div>
-    <h3 class="table-title">Feature Description</h3>
-    <div class="table-wrap">
+    <div class="tbl-wrap">
         <table>
             <thead><tr><th>#</th><th>Feature</th><th>Type</th><th>Description</th></tr></thead>
             <tbody>
-                <tr><td>01</td><td>Customer Age</td><td><span class="badge numeric">Numeric</span></td><td>Age of the customer (18–70)</td></tr>
-                <tr><td>02</td><td>Customer Gender</td><td><span class="badge cat">Categorical</span></td><td>Male / Female / Other</td></tr>
-                <tr><td>03</td><td>Product Purchased</td><td><span class="badge cat">Categorical</span></td><td>Tech product purchased by customer</td></tr>
-                <tr><td>04</td><td>Ticket Type</td><td><span class="badge cat">Categorical</span></td><td>Billing / Technical / Refund etc.</td></tr>
-                <tr><td>05</td><td>Ticket Subject</td><td><span class="badge cat">Categorical</span></td><td>Subject topic of the ticket</td></tr>
-                <tr><td>06</td><td>Ticket Status</td><td><span class="badge cat">Categorical</span></td><td>Open / Closed / Pending</td></tr>
-                <tr><td>07</td><td>Ticket Priority</td><td><span class="badge cat">Categorical</span></td><td>Low / Medium / High / Critical</td></tr>
-                <tr><td>08</td><td>Ticket Channel</td><td><span class="badge cat">Categorical</span></td><td>Email / Phone / Chat / Social Media</td></tr>
-                <tr><td>09</td><td>Response Duration</td><td><span class="badge numeric">Numeric</span></td><td>Time taken to resolve ticket (hrs)</td></tr>
-                <tr><td>10</td><td>Satisfaction Rating</td><td><span class="badge target">Target</span></td><td>Customer rating from 1 (low) to 5 (high)</td></tr>
+                <tr><td>01</td><td>Customer Age</td><td><span class="tag num">Numeric</span></td><td>Age of the customer (18–70)</td></tr>
+                <tr><td>02</td><td>Customer Gender</td><td><span class="tag cat">Categorical</span></td><td>Male / Female / Other</td></tr>
+                <tr><td>03</td><td>Product Purchased</td><td><span class="tag cat">Categorical</span></td><td>Tech product purchased</td></tr>
+                <tr><td>04</td><td>Ticket Type</td><td><span class="tag cat">Categorical</span></td><td>Billing / Technical / Refund etc.</td></tr>
+                <tr><td>05</td><td>Ticket Subject</td><td><span class="tag cat">Categorical</span></td><td>Subject of the ticket</td></tr>
+                <tr><td>06</td><td>Ticket Status</td><td><span class="tag cat">Categorical</span></td><td>Open / Closed / Pending</td></tr>
+                <tr><td>07</td><td>Ticket Priority</td><td><span class="tag cat">Categorical</span></td><td>Low / Medium / High / Critical</td></tr>
+                <tr><td>08</td><td>Ticket Channel</td><td><span class="tag cat">Categorical</span></td><td>Email / Phone / Chat / Social</td></tr>
+                <tr><td>09</td><td>Response Duration</td><td><span class="tag num">Numeric</span></td><td>Time to resolve (hrs)</td></tr>
+                <tr><td>10</td><td>Satisfaction Rating</td><td><span class="tag tgt">Target</span></td><td>Rating 1 (low) to 5 (high)</td></tr>
             </tbody>
         </table>
     </div>
 </section>
 
 <section id="eda">
-    <div class="section-label">03 — Exploratory Data Analysis</div>
+    <div class="sec-tag">03 &mdash; Exploratory Data Analysis</div>
     <h2>Visual <em>Insights</em></h2>
-    <p>Deep dive into data distributions, correlations, and patterns across customer demographics, ticket attributes, and satisfaction levels.</p>
-    <div class="chart-grid">
-        <div class="chart-box large"><div class="chart-label">Satisfaction Distribution</div><img src="/static/csp_eda_charts/01_satisfaction_distribution.png" alt="Satisfaction"/></div>
-        <div class="chart-box large"><div class="chart-label">Customer Age Distribution</div><img src="/static/csp_eda_charts/02_age_distribution.png" alt="Age"/></div>
-        <div class="chart-box"><div class="chart-label">Ticket Priority</div><img src="/static/csp_eda_charts/03_ticket_priority.png" alt="Priority"/></div>
-        <div class="chart-box"><div class="chart-label">Ticket Type</div><img src="/static/csp_eda_charts/04_ticket_type.png" alt="Type"/></div>
-        <div class="chart-box"><div class="chart-label">Ticket Channel</div><img src="/static/csp_eda_charts/05_ticket_channel.png" alt="Channel"/></div>
-        <div class="chart-box"><div class="chart-label">Gender Distribution</div><img src="/static/csp_eda_charts/06_gender_distribution.png" alt="Gender"/></div>
-        <div class="chart-box large"><div class="chart-label">Satisfaction by Ticket Type</div><img src="/static/csp_eda_charts/07_satisfaction_by_ticket_type.png" alt="Sat by Type"/></div>
-        <div class="chart-box large"><div class="chart-label">Satisfaction by Priority</div><img src="/static/csp_eda_charts/08_satisfaction_by_priority.png" alt="Sat by Priority"/></div>
-        <div class="chart-box full"><div class="chart-label">Feature Correlation Heatmap</div><img src="/static/csp_eda_charts/09_correlation_heatmap.png" alt="Heatmap"/></div>
-        <div class="chart-box full"><div class="chart-label">Response Duration vs Satisfaction</div><img src="/static/csp_eda_charts/10_response_duration_vs_satisfaction.png" alt="Duration"/></div>
+    <p class="sec-sub">Deep dive into distributions, correlations, and patterns across ticket attributes and satisfaction levels.</p>
+    <div class="chart-mosaic">
+        <div class="cm-lg"><div class="cm-lbl">Satisfaction Distribution</div><img src="/static/csp_eda_charts/01_satisfaction_distribution.png" alt="Satisfaction"/></div>
+        <div class="cm-lg"><div class="cm-lbl">Customer Age Distribution</div><img src="/static/csp_eda_charts/02_age_distribution.png" alt="Age"/></div>
+        <div class="cm-sm"><div class="cm-lbl">Ticket Priority</div><img src="/static/csp_eda_charts/03_ticket_priority.png" alt="Priority"/></div>
+        <div class="cm-sm"><div class="cm-lbl">Ticket Type</div><img src="/static/csp_eda_charts/04_ticket_type.png" alt="Type"/></div>
+        <div class="cm-sm"><div class="cm-lbl">Ticket Channel</div><img src="/static/csp_eda_charts/05_ticket_channel.png" alt="Channel"/></div>
+        <div class="cm-sm"><div class="cm-lbl">Gender Distribution</div><img src="/static/csp_eda_charts/06_gender_distribution.png" alt="Gender"/></div>
+        <div class="cm-lg"><div class="cm-lbl">Satisfaction by Ticket Type</div><img src="/static/csp_eda_charts/07_satisfaction_by_ticket_type.png" alt="Sat Type"/></div>
+        <div class="cm-lg"><div class="cm-lbl">Satisfaction by Priority</div><img src="/static/csp_eda_charts/08_satisfaction_by_priority.png" alt="Sat Priority"/></div>
+        <div class="cm-full"><div class="cm-lbl">Feature Correlation Heatmap</div><img src="/static/csp_eda_charts/09_correlation_heatmap.png" alt="Heatmap"/></div>
+        <div class="cm-full"><div class="cm-lbl">Response Duration vs Satisfaction</div><img src="/static/csp_eda_charts/10_response_duration_vs_satisfaction.png" alt="Duration"/></div>
     </div>
 </section>
 
 <section id="features">
-    <div class="section-label">04 — Feature Engineering</div>
+    <div class="sec-tag">04 &mdash; Feature Engineering</div>
     <h2>Feature <em>Engineering</em></h2>
-    <p>New features crafted, scaling applied, and best features selected using statistical testing to maximize model performance.</p>
-    <div class="fe-grid">
-        <div class="fe-card">
-            <div class="fe-num">3</div>
-            <h3>New Features Created</h3>
-            <ul>
-                <li>Age Group — binned from Customer Age</li>
-                <li>Duration Bucket — binned from Response Duration</li>
-                <li>Purchase Recency — years since product purchase</li>
-            </ul>
-        </div>
-        <div class="fe-card">
-            <div class="fe-num">2</div>
-            <h3>Scalers Applied</h3>
-            <ul>
-                <li>StandardScaler — continuous numeric columns</li>
-                <li>MinMaxScaler — year and month columns</li>
-            </ul>
-        </div>
-        <div class="fe-card">
-            <div class="fe-num">8</div>
-            <h3>Top Features Selected</h3>
-            <ul>
-                <li>SelectKBest with ANOVA F-test</li>
-                <li>Top 8 highest scoring features retained</li>
-                <li>Saved to csp_features_final.csv</li>
-            </ul>
-        </div>
+    <p class="sec-sub">New features crafted, scaling applied, and top features selected using ANOVA F-test statistical testing.</p>
+    <div class="fe-row">
+        <div class="fe-block"><div class="fe-big">3</div><h3>New Features</h3><ul><li>Age Group — binned from Customer Age</li><li>Duration Bucket — binned from Response Duration</li><li>Purchase Recency — years since purchase</li></ul></div>
+        <div class="fe-block"><div class="fe-big">2</div><h3>Scalers Applied</h3><ul><li>StandardScaler — continuous columns</li><li>MinMaxScaler — year and month columns</li></ul></div>
+        <div class="fe-block"><div class="fe-big">8</div><h3>Top Features Selected</h3><ul><li>SelectKBest with ANOVA F-test</li><li>Top 8 features retained for modeling</li><li>Saved to csp_features_final.csv</li></ul></div>
     </div>
-    <div class="chart-center">
-        <div class="chart-label">Feature Importance — ANOVA F-Score</div>
+    <div class="img-center">
+        <div class="cm-lbl">Feature Importance — ANOVA F-Score</div>
         <img src="/static/csp_fe_charts/feature_importance.png" alt="Feature Importance"/>
     </div>
 </section>
 
 <section id="models">
-    <div class="section-label">05 — Model Building</div>
+    <div class="sec-tag">05 &mdash; Model Building</div>
     <h2>ML <em>Models</em></h2>
-    <p>Six machine learning classifiers trained, cross-validated, and compared to identify the best performing model.</p>
-    <div class="model-cards">
-        <div class="model-card"><div class="model-icon">LR</div><div class="model-name">Logistic Regression</div><div class="model-type">Linear</div></div>
-        <div class="model-card"><div class="model-icon">DT</div><div class="model-name">Decision Tree</div><div class="model-type">Tree-based</div></div>
-        <div class="model-card best">
-            <div class="best-tag">Best</div>
-            <div class="model-icon">RF</div>
-            <div class="model-name">Random Forest</div>
-            <div class="model-type">Ensemble</div>
-        </div>
-        <div class="model-card"><div class="model-icon">GB</div><div class="model-name">Gradient Boosting</div><div class="model-type">Ensemble</div></div>
-        <div class="model-card"><div class="model-icon">KNN</div><div class="model-name">K-Nearest Neighbors</div><div class="model-type">Instance-based</div></div>
-        <div class="model-card"><div class="model-icon">SVM</div><div class="model-name">Support Vector Machine</div><div class="model-type">Kernel-based</div></div>
+    <p class="sec-sub">Six classifiers trained and compared using train accuracy, test accuracy, and 5-fold cross-validation.</p>
+    <div class="model-row">
+        <div class="m-card"><div class="m-abbr">LR</div><div class="m-name">Logistic Regression</div><div class="m-type">Linear</div></div>
+        <div class="m-card"><div class="m-abbr">DT</div><div class="m-name">Decision Tree</div><div class="m-type">Tree-based</div></div>
+        <div class="m-card m-best"><div class="m-badge">Best</div><div class="m-abbr">RF</div><div class="m-name">Random Forest</div><div class="m-type">Ensemble</div></div>
+        <div class="m-card"><div class="m-abbr">GB</div><div class="m-name">Gradient Boosting</div><div class="m-type">Ensemble</div></div>
+        <div class="m-card"><div class="m-abbr">KNN</div><div class="m-name">K-Nearest Neighbors</div><div class="m-type">Instance-based</div></div>
+        <div class="m-card"><div class="m-abbr">SVM</div><div class="m-name">Support Vector Machine</div><div class="m-type">Kernel-based</div></div>
     </div>
-    <div class="table-wrap" style="margin-top:40px">
+    <div class="tbl-wrap" style="margin-top:40px">
         <table>
-            <thead>
-                <tr><th>Model</th><th>Train Accuracy</th><th>Test Accuracy</th><th>CV Mean (5-Fold)</th><th>CV Std</th></tr>
-            </thead>
+            <thead><tr><th>Model</th><th>Train Acc.</th><th>Test Acc.</th><th>CV Mean</th><th>CV Std</th></tr></thead>
             <tbody>
                 <tr><td>Logistic Regression</td><td>23.94%</td><td>18.41%</td><td>20.22%</td><td>1.45%</td></tr>
                 <tr><td>Decision Tree</td><td>100.00%</td><td>19.01%</td><td>19.72%</td><td>1.72%</td></tr>
-                <tr class="highlight"><td>Random Forest ★</td><td>100.00%</td><td>18.77%</td><td>20.77%</td><td>0.20%</td></tr>
+                <tr class="best-row"><td>Random Forest ★</td><td>100.00%</td><td>18.77%</td><td>20.77%</td><td>0.20%</td></tr>
                 <tr><td>Gradient Boosting</td><td>55.26%</td><td>21.06%</td><td>19.36%</td><td>1.76%</td></tr>
                 <tr><td>K-Nearest Neighbors</td><td>44.63%</td><td>18.77%</td><td>19.86%</td><td>1.06%</td></tr>
                 <tr><td>Support Vector Machine</td><td>25.13%</td><td>21.78%</td><td>20.69%</td><td>1.02%</td></tr>
@@ -221,244 +370,144 @@
 </section>
 
 <section id="evaluation">
-    <div class="section-label">06 — Evaluation</div>
+    <div class="sec-tag">06 &mdash; Evaluation</div>
     <h2>Model <em>Evaluation</em></h2>
-    <p>Comprehensive evaluation using confusion matrix, feature importance ranking, and cross-model accuracy comparison.</p>
-    <div class="eval-grid">
-        <div class="eval-box"><div class="chart-label">Confusion Matrix</div><img src="/static/csp_eval_charts/01_confusion_matrix.png" alt="Confusion Matrix"/></div>
-        <div class="eval-box"><div class="chart-label">Feature Importance</div><img src="/static/csp_eval_charts/02_feature_importance.png" alt="Feature Importance"/></div>
-        <div class="eval-box full"><div class="chart-label">Model Comparison — Train vs Test Accuracy</div><img src="/static/csp_eval_charts/03_model_comparison.png" alt="Model Comparison"/></div>
+    <p class="sec-sub">Comprehensive evaluation using confusion matrix, feature importance, and cross-model comparison.</p>
+    <div class="eval-mosaic">
+        <div class="ev-half"><div class="cm-lbl">Confusion Matrix</div><img src="/static/csp_eval_charts/01_confusion_matrix.png" alt="Confusion"/></div>
+        <div class="ev-half"><div class="cm-lbl">Feature Importance</div><img src="/static/csp_eval_charts/02_feature_importance.png" alt="Importance"/></div>
+        <div class="ev-full"><div class="cm-lbl">Model Comparison — Train vs Test Accuracy</div><img src="/static/csp_eval_charts/03_model_comparison.png" alt="Comparison"/></div>
     </div>
 </section>
 
-<!-- PREDICTION SECTION -->
 <section id="predict">
-    <div class="section-label">07 — Live Prediction</div>
+    <div class="sec-tag">07 &mdash; Live Prediction</div>
     <h2>Predict <em>Satisfaction</em></h2>
-    <p>Fill in the ticket details below and our Random Forest model will predict the customer satisfaction rating instantly.</p>
-
-    <div class="predict-box">
-        <div class="predict-grid">
-            <div class="input-group">
-                <label>Customer Age</label>
-                <input type="number" id="customer_age" min="18" max="70" placeholder="e.g. 35"/>
+    <p class="sec-sub">Enter ticket details below. Our Random Forest model will instantly predict the customer satisfaction rating.</p>
+    <div class="predict-panel">
+        <div class="predict-left">
+            <div class="p-section-title">Ticket Information</div>
+            <div class="p-grid">
+                <div class="p-field"><label>Ticket Type</label><div class="select-wrap"><select id="ticket_type"><option value="">Select type</option><option>Billing inquiry</option><option>Cancellation request</option><option>Product inquiry</option><option>Refund request</option><option>Technical issue</option></select><span class="sel-arrow">&#8964;</span></div></div>
+                <div class="p-field"><label>Ticket Subject</label><div class="select-wrap"><select id="ticket_subject"><option value="">Select subject</option><option>Battery life</option><option>Cancellation request</option><option>Data loss</option><option>Delivery problem</option><option>Hardware issue</option><option>Installation support</option><option>Network problem</option><option>Payment issue</option><option>Product compatibility</option><option>Product setup</option><option>Refund request</option><option>Software bug</option></select><span class="sel-arrow">&#8964;</span></div></div>
+                <div class="p-field"><label>Ticket Priority</label><div class="select-wrap"><select id="ticket_priority"><option value="">Select priority</option><option>Critical</option><option>High</option><option>Low</option><option>Medium</option></select><span class="sel-arrow">&#8964;</span></div></div>
+                <div class="p-field"><label>Ticket Status</label><div class="select-wrap"><select id="ticket_status"><option value="">Select status</option><option>Closed</option><option>Open</option><option>Pending Customer Response</option></select><span class="sel-arrow">&#8964;</span></div></div>
+                <div class="p-field"><label>Ticket Channel</label><div class="select-wrap"><select id="ticket_channel"><option value="">Select channel</option><option>Chat</option><option>Email</option><option>Phone</option><option>Social media</option></select><span class="sel-arrow">&#8964;</span></div></div>
+                <div class="p-field"><label>Response Duration (hrs)</label><input type="number" id="response_duration" min="0" max="200" placeholder="e.g. 12"/></div>
             </div>
-            <div class="input-group">
-                <label>Ticket Type</label>
-                <select id="ticket_type">
-                    <option value="">Select type</option>
-                    <option>Billing inquiry</option>
-                    <option>Cancellation request</option>
-                    <option>Product inquiry</option>
-                    <option>Refund request</option>
-                    <option>Technical issue</option>
-                </select>
+            <div class="p-section-title" style="margin-top:28px">Customer Information</div>
+            <div class="p-grid">
+                <div class="p-field"><label>Customer Age</label><input type="number" id="customer_age" min="18" max="70" placeholder="e.g. 35"/></div>
+                <div class="p-field"><label>Purchase Year</label><input type="number" id="purchase_year" min="2018" max="2024" placeholder="e.g. 2021"/></div>
+                <div class="p-field"><label>Purchase Month</label><input type="number" id="purchase_month" min="1" max="12" placeholder="e.g. 6"/></div>
             </div>
-            <div class="input-group">
-                <label>Ticket Subject</label>
-                <select id="ticket_subject">
-                    <option value="">Select subject</option>
-                    <option>Battery life</option>
-                    <option>Cancellation request</option>
-                    <option>Data loss</option>
-                    <option>Delivery problem</option>
-                    <option>Hardware issue</option>
-                    <option>Installation support</option>
-                    <option>Network problem</option>
-                    <option>Payment issue</option>
-                    <option>Product compatibility</option>
-                    <option>Product setup</option>
-                    <option>Refund request</option>
-                    <option>Software bug</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>Ticket Status</label>
-                <select id="ticket_status">
-                    <option value="">Select status</option>
-                    <option>Closed</option>
-                    <option>Open</option>
-                    <option>Pending Customer Response</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>Ticket Priority</label>
-                <select id="ticket_priority">
-                    <option value="">Select priority</option>
-                    <option>Critical</option>
-                    <option>High</option>
-                    <option>Low</option>
-                    <option>Medium</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>Ticket Channel</label>
-                <select id="ticket_channel">
-                    <option value="">Select channel</option>
-                    <option>Chat</option>
-                    <option>Email</option>
-                    <option>Phone</option>
-                    <option>Social media</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>Response Duration (hrs)</label>
-                <input type="number" id="response_duration" min="0" max="100" placeholder="e.g. 12"/>
-            </div>
-            <div class="input-group">
-                <label>Purchase Year</label>
-                <input type="number" id="purchase_year" min="2018" max="2024" placeholder="e.g. 2021"/>
-            </div>
-            <div class="input-group">
-                <label>Purchase Month</label>
-                <input type="number" id="purchase_month" min="1" max="12" placeholder="e.g. 6"/>
-            </div>
+            <button class="p-btn" id="predict-btn" onclick="runPredict()">
+                <span id="btn-text">Predict Satisfaction Rating</span>
+                <div class="p-btn-shine"></div>
+            </button>
         </div>
-
-        <button class="predict-btn" onclick="predict()">
-            <span>Predict Satisfaction</span>
-            <div class="btn-glow"></div>
-        </button>
-
-        <div class="result-box" id="result-box">
-            <div class="result-inner">
-                <div class="result-label">Predicted Rating</div>
-                <div class="result-stars" id="result-stars"></div>
-                <div class="result-score" id="result-score"></div>
-                <div class="result-message" id="result-message"></div>
+        <div class="predict-right">
+            <div class="result-idle" id="result-idle">
+                <div class="idle-icon">◎</div>
+                <p>Fill in the form and click Predict to see the satisfaction rating</p>
+            </div>
+            <div class="result-show" id="result-show">
+                <div class="res-label">Predicted Satisfaction</div>
+                <div class="res-stars" id="res-stars"></div>
+                <div class="res-num" id="res-num"></div>
+                <div class="res-msg" id="res-msg"></div>
+                <div class="res-bar-wrap"><div class="res-bar" id="res-bar"></div></div>
+                <div class="res-hint">Based on Random Forest model</div>
+                <button class="p-btn-reset" onclick="resetForm()">Predict Again</button>
             </div>
         </div>
     </div>
 </section>
 
 <section id="conclusion">
-    <div class="section-label">08 — Conclusion</div>
+    <div class="sec-tag">08 &mdash; Conclusion</div>
     <h2>Key <em>Findings</em></h2>
-    <p>Insights derived from the complete machine learning pipeline applied to customer support ticket data.</p>
-    <div class="conclusion-grid">
-        <div class="conc-card">
-            <div class="conc-num">01</div>
-            <h3>Key Findings</h3>
-            <ul>
-                <li>Ticket Priority and Type are the most influential predictors</li>
-                <li>Response Duration significantly impacts satisfaction</li>
-                <li>Satisfaction ratings are evenly spread across 1–5</li>
-                <li>Dataset shows weak predictive signal from metadata alone</li>
-            </ul>
-        </div>
-        <div class="conc-card gold">
-            <div class="conc-num">02</div>
-            <h3>Best Model</h3>
-            <p>Random Forest achieved the most stable cross-validation score of 20.77%. All models show similar accuracy suggesting NLP on ticket descriptions would significantly improve results.</p>
-        </div>
-        <div class="conc-card">
-            <div class="conc-num">03</div>
-            <h3>Future Improvements</h3>
-            <ul>
-                <li>Apply NLP on Ticket Description text</li>
-                <li>Hyperparameter tuning with GridSearchCV</li>
-                <li>Experiment with XGBoost and LightGBM</li>
-                <li>Deploy as web app using Flask or FastAPI</li>
-            </ul>
-        </div>
+    <p class="sec-sub">Insights derived from the complete ML pipeline applied to customer support ticket data.</p>
+    <div class="conc-row">
+        <div class="conc-block"><div class="conc-n">01</div><h3>Key Findings</h3><ul><li>Ticket Priority and Type are most influential</li><li>Response Duration impacts satisfaction</li><li>Ratings evenly spread across 1–5</li><li>Weak predictive signal from metadata alone</li></ul></div>
+        <div class="conc-block conc-gold"><div class="conc-n">02</div><h3>Best Model</h3><p>Random Forest achieved the most stable CV score of 20.77%. NLP on ticket descriptions would significantly improve results.</p></div>
+        <div class="conc-block"><div class="conc-n">03</div><h3>Future Work</h3><ul><li>Apply NLP on Ticket Description</li><li>Hyperparameter tuning (GridSearchCV)</li><li>XGBoost and LightGBM experiments</li><li>Full Flask web app deployment</li></ul></div>
     </div>
 </section>
 
 </main>
 
 <footer>
-    <div class="footer-line"></div>
-    <div class="footer-logo">CSP</div>
-    <p>Customer Satisfaction Prediction · Machine Learning Project</p>
-    <small>Python · Scikit-learn · Pandas · Data Science Domain</small>
+    <div class="ft-top"></div>
+    <div class="ft-brand">CSP</div>
+    <p>Customer Satisfaction Prediction &nbsp;·&nbsp; Machine Learning Project</p>
+    <small>Python &nbsp;·&nbsp; Scikit-learn &nbsp;·&nbsp; Flask &nbsp;·&nbsp; Data Science</small>
 </footer>
 
 <script>
-    const loader = document.getElementById('loader');
-    window.addEventListener('load', () => { setTimeout(() => loader.classList.add('hidden'), 900); });
+setTimeout(() => { document.getElementById('loader').classList.add('out'); }, 1500);
 
-    const cursor = document.getElementById('cursor');
-    const follower = document.getElementById('cursor-follower');
-    document.addEventListener('mousemove', e => {
-        cursor.style.left = e.clientX + 'px';
-        cursor.style.top = e.clientY + 'px';
-        setTimeout(() => {
-            follower.style.left = e.clientX + 'px';
-            follower.style.top = e.clientY + 'px';
-        }, 80);
-    });
-    document.querySelectorAll('a, .card, .stat-card, .chart-box, .model-card, .predict-btn').forEach(el => {
-        el.addEventListener('mouseenter', () => cursor.classList.add('active'));
-        el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
-    });
+const cursor = document.getElementById('cursor');
+const cursorTr = document.getElementById('cursor-trail');
+document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX+'px'; cursor.style.top = e.clientY+'px';
+    setTimeout(() => { cursorTr.style.left = e.clientX+'px'; cursorTr.style.top = e.clientY+'px'; }, 90);
+});
+document.querySelectorAll('a,button,select,input,.m-card,.g-card').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+});
 
-    window.addEventListener('scroll', () => {
-        document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 80);
-    });
+window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('stuck', window.scrollY > 60);
+});
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.08 });
-    document.querySelectorAll('section, .card, .stat-card, .chart-box, .fe-card, .model-card, .conc-card, .eval-box').forEach(el => {
-        observer.observe(el);
-    });
+const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('shown'); });
+}, {threshold:0.07});
+document.querySelectorAll('section,.g-card,.fe-block,.m-card,.conc-block,.ev-half,.ev-full,.cm-sm,.cm-lg,.cm-full,.stat-item').forEach(el => io.observe(el));
 
-    async function predict() {
-        const btn = document.querySelector('.predict-btn span');
-        btn.textContent = 'Predicting...';
-
-        const data = {
-            customer_age:      document.getElementById('customer_age').value,
-            ticket_type:       document.getElementById('ticket_type').value,
-            ticket_subject:    document.getElementById('ticket_subject').value,
-            ticket_status:     document.getElementById('ticket_status').value,
-            ticket_priority:   document.getElementById('ticket_priority').value,
-            ticket_channel:    document.getElementById('ticket_channel').value,
-            response_duration: document.getElementById('response_duration').value,
-            purchase_year:     document.getElementById('purchase_year').value,
-            purchase_month:    document.getElementById('purchase_month').value
-        };
-
-        if (Object.values(data).some(v => !v)) {
-            alert('Please fill in all fields!');
-            btn.textContent = 'Predict Satisfaction';
-            return;
-        }
-
-        try {
-            const response = await fetch('/predict', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-
-            const result = await response.json();
-
-            if (result.status === 'success') {
-                const box     = document.getElementById('result-box');
-                const stars   = document.getElementById('result-stars');
-                const score   = document.getElementById('result-score');
-                const message = document.getElementById('result-message');
-
-                stars.textContent   = '★'.repeat(result.prediction) + '☆'.repeat(5 - result.prediction);
-                score.textContent   = result.prediction + ' / 5';
-                message.textContent = result.message;
-
-                box.classList.add('show');
-
-                const colors = { 1:'#e74c3c', 2:'#e67e22', 3:'#f1c40f', 4:'#2ecc71', 5:'#c9a84c' };
-                score.style.color = colors[result.prediction];
-                stars.style.color = colors[result.prediction];
-            } else {
-                alert('Error: ' + result.message);
-            }
-        } catch (err) {
-            alert('Connection error. Make sure Flask is running!');
-        }
-
-        btn.textContent = 'Predict Satisfaction';
+async function runPredict() {
+    const fields = ['ticket_type','ticket_subject','ticket_priority','ticket_status','ticket_channel','response_duration','customer_age','purchase_year','purchase_month'];
+    const data = {};
+    for(const f of fields) {
+        data[f] = document.getElementById(f).value;
+        if(!data[f]) { alert('Please fill in all fields!'); return; }
     }
-</script>
+    const btn = document.getElementById('predict-btn');
+    const txt = document.getElementById('btn-text');
+    btn.classList.add('loading'); txt.textContent = 'Predicting...';
+    try {
+        const res = await fetch('/predict', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+        const result = await res.json();
+        if(result.status === 'success') { showResult(result); }
+        else { alert('Error: ' + result.message); }
+    } catch(e) { alert('Connection error. Make sure Flask is running!'); }
+    btn.classList.remove('loading'); txt.textContent = 'Predict Satisfaction Rating';
+}
 
+function showResult(result) {
+    document.getElementById('result-idle').style.display = 'none';
+    const show = document.getElementById('result-show');
+    show.style.display = 'flex';
+    const colors = {1:'#e74c3c',2:'#e67e22',3:'#f1c40f',4:'#2ecc71',5:'#c8a84b'};
+    const msgs = {1:'Very Dissatisfied',2:'Dissatisfied',3:'Neutral',4:'Satisfied',5:'Very Satisfied'};
+    document.getElementById('res-stars').textContent = '★'.repeat(result.prediction) + '☆'.repeat(5-result.prediction);
+    document.getElementById('res-num').textContent = result.prediction + ' / 5';
+    document.getElementById('res-msg').textContent = msgs[result.prediction];
+    const bar = document.getElementById('res-bar');
+    bar.style.width = '0%'; bar.style.background = colors[result.prediction];
+    document.getElementById('res-stars').style.color = colors[result.prediction];
+    document.getElementById('res-num').style.color = colors[result.prediction];
+    setTimeout(() => { bar.style.width = (result.prediction/5*100)+'%'; }, 100);
+}
+
+function resetForm() {
+    document.getElementById('result-idle').style.display = 'flex';
+    document.getElementById('result-show').style.display = 'none';
+    document.querySelectorAll('select').forEach(s => s.value = '');
+    document.querySelectorAll('input[type=number]').forEach(i => i.value = '');
+}
+</script>
 </body>
 </html>
