@@ -1,10 +1,10 @@
-Customer Service Prediction using Machine Learning
-Overview
+# Customer Service Prediction using Machine Learning
+#Overview
 
 Customer service teams receive thousands of support tickets daily. Manually prioritizing and categorizing them is inefficient and slow.
 This project uses Machine Learning to analyze customer queries and predict the service category or priority automatically, helping support teams respond faster.
 
-Problem Statement
+#Problem Statement
 
 Customer support systems often struggle with:
 
@@ -16,7 +16,7 @@ Delayed response times
 
 This project builds an ML model that predicts the category of customer service requests based on the message content.
 
-Objectives
+#Objectives
 
 Automate classification of customer support tickets
 
