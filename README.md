@@ -1,10 +1,10 @@
 # Customer Service Prediction using Machine Learning
-#Overview
+## Overview
 
 Customer service teams receive thousands of support tickets daily. Manually prioritizing and categorizing them is inefficient and slow.
 This project uses Machine Learning to analyze customer queries and predict the service category or priority automatically, helping support teams respond faster.
 
-#Problem Statement
+## Problem Statement
 
 Customer support systems often struggle with:
 
@@ -16,7 +16,7 @@ Delayed response times
 
 This project builds an ML model that predicts the category of customer service requests based on the message content.
 
-#Objectives
+## Objectives
 
 Automate classification of customer support tickets
 
@@ -26,7 +26,7 @@ Improve response speed and service efficiency
 
 Provide insights into common customer issues
 
-Dataset
+## Dataset
 
 The dataset contains customer service request data with fields such as:
 
@@ -40,7 +40,7 @@ Timestamp
 
 Customer Information (optional)
 
-Example categories:
+## Example categories:
 
 Billing Issue
 
@@ -52,7 +52,7 @@ Product Inquiry
 
 Complaint
 
-Technologies Used
+## Technologies Used
 
 Python
 
@@ -76,7 +76,7 @@ Data Cleaning
 
 Text Preprocessing
 
-Feature Extraction (TF-IDF / Count Vectorizer)
+## Feature Extraction (TF-IDF / Count Vectorizer)
 
 Model Training
 
@@ -96,7 +96,7 @@ Support Vector Machine (optional)
 
 Model Evaluation
 
-Performance is evaluated using:
+## Performance is evaluated using:
 
 Accuracy
 
@@ -108,7 +108,7 @@ F1 Score
 
 Confusion Matrix
 
-Project Structure
+## Project Structure
 customer-service-prediction
 │
 ├── dataset
@@ -145,7 +145,7 @@ or if using Streamlit:
 streamlit run app.py
 Example Prediction
 
-Input:
+### Input:
 
 "My internet connection is not working since yesterday."
 
