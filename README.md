@@ -165,6 +165,6 @@ Advanced sentiment analysis
 
 Automated ticket routing
 
-Conclusion
+## Conclusion
 
 This project demonstrates how machine learning can automate customer service operations by predicting ticket categories and priorities, improving efficiency and reducing response time.
